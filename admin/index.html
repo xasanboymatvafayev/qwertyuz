@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Casino Admin</title>
+<style>
+:root{--bg:#0f0f1a;--bg2:#1a1a2e;--card:#1e1e35;--border:#2a2a45;--accent:#f5a623;--green:#00e676;--red:#ff1744;--blue:#448aff;--text:#fff;--text2:#8888aa}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;position:fixed;height:100vh;display:flex;flex-direction:column}
+.s-logo{padding:0 16px 20px;font-size:18px;font-weight:900;color:var(--accent);border-bottom:1px solid var(--border);margin-bottom:12px}
+.nl{display:flex;align-items:center;gap:8px;padding:10px 16px;color:var(--text2);cursor:pointer;font-size:13px;transition:all .2s;border-right:3px solid transparent}
+.nl:hover,.nl.on{color:#fff;background:rgba(245,166,35,.08);border-right-color:var(--accent)}
+.main{margin-left:220px;flex:1;padding:20px}
+.page{display:none}.page.on{display:block}
+.ptitle{font-size:22px;font-weight:700;margin-bottom:20px}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+.sc .n{font-size:26px;font-weight:700;margin-bottom:4px}
+.sc .l{color:var(--text2);font-size:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
+.ct{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:9px 10px;color:var(--text2);font-size:12px;border-bottom:1px solid var(--border);text-transform:uppercase}
+td{padding:11px 10px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.bp{background:rgba(245,166,35,.15);color:var(--accent)}
+.ba{background:rgba(0,230,118,.15);color:var(--green)}
+.br{background:rgba(255,23,68,.15);color:var(--red)}
+.btn{padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:opacity .2s}
+.btn:hover{opacity:.85}
+.btn-ok{background:var(--green);color:#000}
+.btn-bad{background:var(--red);color:#fff}
+.btn-acc{background:var(--accent);color:#000}
+.btn-sm{padding:4px 9px;font-size:11px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.fi{display:flex;flex-direction:column;gap:5px}
+.fi label{font-size:12px;color:var(--text2);text-transform:uppercase}
+.fi input,.fi select{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:#fff;font-size:13px;outline:none}
+.fi input:focus,.fi select:focus{border-color:var(--accent)}
+.sb{display:flex;gap:8px;margin-bottom:14px}
+.sb input{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:#fff;font-size:13px;outline:none}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 18px;font-size:13px;z-index:999;display:none}
+.toast.show{display:block}
+.toast.ok{border-color:var(--green);color:var(--green)}
+.toast.err{border-color:var(--red);color:var(--red)}
+/* LOGIN */
+#lp{display:flex;align-items:center;justify-content:center;min-height:100vh;width:100%}
+.lb{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:30px;width:360px}
+.lb h2{text-align:center;font-size:22px;margin-bottom:6px}
+.lb p{text-align:center;color:var(--text2);font-size:13px;margin-bottom:24px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="lp">
+  <div class="lb">
+    <div style="text-align:center;font-size:48px;margin-bottom:12px">🎰</div>
+    <h2>Admin Panel</h2>
+    <p>Casino boshqaruv tizimi</p>
+    <div class="fi" style="margin-bottom:12px"><label>Login</label><input id="al" placeholder="admin login" type="text"></div>
+    <div class="fi" style="margin-bottom:16px"><label>Parol</label><input id="ap" placeholder="parol" type="password"></div>
+    <button class="btn btn-acc" style="width:100%;padding:12px;font-size:15px" onclick="aLogin()">Kirish</button>
+    <div id="ae" style="color:var(--red);font-size:13px;margin-top:8px;text-align:center;display:none">Noto'g'ri ma'lumotlar</div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sb" style="display:none">
+  <div class="s-logo">🎰 ADMIN</div>
+  <div class="nl on" onclick="pg('dash')">📊 Dashboard</div>
+  <div class="nl" onclick="pg('txns')">💰 To'lovlar</div>
+  <div class="nl" onclick="pg('usrs')">👥 Foydalanuvchilar</div>
+  <div class="nl" onclick="pg('promo')">🎟 Promokodlar</div>
+  <div class="nl" onclick="pg('chs')">📢 Kanallar</div>
+  <div class="nl" onclick="pg('ads')">📣 Reklama</div>
+  <div style="margin-top:auto;padding:16px">
+    <div style="color:var(--text2);font-size:12px;margin-bottom:8px" id="ainf">—</div>
+    <button class="btn btn-bad btn-sm" onclick="logout()">Chiqish</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="mn" style="display:none">
+
+  <!-- DASHBOARD -->
+  <div class="page on" id="dash">
+    <div class="ptitle">📊 Dashboard</div>
+    <div class="sg">
+      <div class="sc"><div class="n" id="d-users" style="color:var(--blue)">—</div><div class="l">Foydalanuvchilar</div></div>
+      <div class="sc"><div class="n" id="d-bal" style="color:var(--accent)">—</div><div class="l">Jami balans</div></div>
+      <div class="sc"><div class="n" id="d-profit" style="color:var(--green)">—</div><div class="l">Bugungi foyda</div></div>
+      <div class="sc"><div class="n" id="d-active" style="color:var(--green)">—</div><div class="l">Bugun aktiv</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card"><div class="ct">🏆 Top yutuqchilar</div><div id="tw">Yuklanmoqda...</div></div>
+      <div class="card"><div class="ct">📉 Top yutqazganlar</div><div id="tl">Yuklanmoqda...</div></div>
+    </div>
+  </div>
+
+  <!-- TRANSACTIONS -->
+  <div class="page" id="txns">
+    <div class="ptitle">💰 To'lovlar</div>
+    <div class="card">
+      <div class="ct">⏳ Kutayotganlar <button class="btn btn-acc btn-sm" onclick="loadPend()">Yangilash</button></div>
+      <table><thead><tr><th>#</th><th>Foydalanuvchi</th><th>Tur</th><th>Summa</th><th>Vaqt</th><th>Amal</th></tr></thead>
+      <tbody id="pt">
+        <tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">Yuklanmoqda...</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="page" id="usrs">
+    <div class="ptitle">👥 Foydalanuvchilar</div>
+    <div class="sb">
+      <input id="us" placeholder="Login yoki Telegram ID..." oninput="searchU()">
+      <button class="btn btn-acc btn-sm" onclick="loadU()">Qidirish</button>
+    </div>
+    <div class="card">
+      <table><thead><tr><th>ID</th><th>Login</th><th>Telegram</th><th>Balans</th><th>Yutuq</th><th>Holat</th><th>Amal</th></tr></thead>
+      <tbody id="ut"></tbody></table>
+    </div>
+    <!-- User actions modal -->
+    <div id="um" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:400px">
+        <div style="font-size:17px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between">
+          👤 Boshqarish <button class="btn btn-sm" onclick="document.getElementById('um').style.display='none'" style="background:var(--bg2)">✕</button>
+        </div>
+        <div id="um-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROMO -->
+  <div class="page" id="promo">
+    <div class="ptitle">🎟 Promokodlar</div>
+    <div class="card">
+      <div class="ct">Yangi promokod</div>
+      <div class="fg">
+        <div class="fi"><label>Kod</label><input id="pc" placeholder="BONUS50"></div>
+        <div class="fi"><label>Tur</label><select id="pt2"><option value="percentage">Foiz (%)</option><option value="fixed">Belgilangan (UZS)</option></select></div>
+        <div class="fi"><label>Qiymat</label><input type="number" id="pv" placeholder="50"></div>
+        <div class="fi"><label>Max foydalanish (bo'sh=∞)</label><input type="number" id="pu" placeholder=""></div>
+        <div class="fi"><label>Amal qilish (kun)</label><input type="number" id="pd" placeholder="30"></div>
+        <div class="fi"><label>Min depozit (UZS)</label><input type="number" id="pm" placeholder="0"></div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;margin-bottom:14px;cursor:pointer;font-size:13px">
+        <input type="checkbox" id="ps"> Kanal obunasi talab qilinsin
+      </label>
+      <button class="btn btn-acc" onclick="createPromo()">Yaratish</button>
+    </div>
+    <div class="card">
+      <div class="ct">Mavjud promokodlar <button class="btn btn-sm" onclick="loadPromos()" style="background:var(--bg2)">Yangilash</button></div>
+      <table><thead><tr><th>Kod</th><th>Tur</th><th>Qiymat</th><th>Foydalanish</th><th>Muddati</th><th>Holat</th></tr></thead>
+      <tbody id="promt"></tbody></table>
+    </div>
+  </div>
+
+  <!-- CHANNELS -->
+  <div class="page" id="chs">
+    <div class="ptitle">📢 Majburiy kanallar</div>
+    <div class="card">
+      <div class="ct">Kanal qo'shish</div>
+      <div class="fg">
+        <div class="fi"><label>Kanal ID (@username yoki -100xxxx)</label><input id="ci" placeholder="@mychannel"></div>
+        <div class="fi"><label>Kanal nomi</label><input id="cn" placeholder="Kanal nomi"></div>
+        <div class="fi"><label>Kanal URL</label><input id="cu" placeholder="https://t.me/mychannel"></div>
+      </div>
+      <button class="btn btn-acc" onclick="addCh()">Qo'shish</button>
+    </div>
+    <div class="card"><div class="ct">Aktiv kanallar</div><div id="chl">Yuklanmoqda...</div></div>
+  </div>
+
+  <!-- ADS -->
+  <div class="page" id="ads">
+    <div class="ptitle">📣 Reklama</div>
+    <div class="card">
+      <div class="ct">Yangi reklama</div>
+      <div class="fg">
+        <div class="fi"><label>Tur</label><select id="at"><option value="banner">Banner</option><option value="popup">Popup</option><option value="bot_message">Bot xabari</option></select></div>
+        <div class="fi"><label>Sarlavha</label><input id="ati" placeholder="Sarlavha"></div>
+      </div>
+      <div class="fi" style="margin-bottom:12px"><label>Matn</label><input id="ac" placeholder="Reklama matni"></div>
+      <div class="fg">
+        <div class="fi"><label>Rasm URL (ixtiyoriy)</label><input id="ai" placeholder="https://..."></div>
+        <div class="fi"><label>Havola (ixtiyoriy)</label><input id="al2" placeholder="https://..."></div>
+      </div>
+      <button class="btn btn-acc" onclick="createAd()" style="margin-top:6px">Yaratish</button>
+    </div>
+    <div class="card">
+      <div class="ct">Reklamalar</div>
+      <table><thead><tr><th>Tur</th><th>Sarlavha</th><th>Ko'rsatilgan</th><th>Holat</th></tr></thead>
+      <tbody id="adst"></tbody></table>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="t"></div>
+
+<script>
+const API = 'https://qwertyuz-production.up.railway.app/api';
+let tok = localStorage.getItem('atk');
+let selUid = null;
+
+window.onload = () => {
+  if (tok) showAdmin();
+};
+
+async function api(method, path, data) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (tok) opts.headers['Authorization'] = `Bearer ${tok}`;
+  if (data) opts.body = JSON.stringify(data);
+  const r = await fetch(API + path, opts);
+  const j = await r.json();
+  return { d: j, ok: r.ok };
+}
+
+async function aLogin() {
+  const login = document.getElementById('al').value;
+  const pass = document.getElementById('ap').value;
+  const r = await api('POST', '/auth/login', { login, password: pass });
+  if (r.ok && r.d.user?.is_admin) {
+    tok = r.d.access_token;
+    localStorage.setItem('atk', tok);
+    document.getElementById('ainf').textContent = '👑 ' + r.d.user.login;
+    showAdmin();
+  } else {
+    document.getElementById('ae').style.display = 'block';
+  }
+}
+
+function showAdmin() {
+  document.getElementById('lp').style.display = 'none';
+  document.getElementById('sb').style.display = 'flex';
+  document.getElementById('mn').style.display = 'block';
+  loadStats(); loadPend(); loadU(); loadPromos(); loadChs(); loadAds();
+}
+
+function logout() { tok = null; localStorage.removeItem('atk'); location.reload(); }
+
+function pg(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.nl').forEach(n => n.classList.remove('on'));
+  event.target.classList.add('on');
+}
+
+async function loadStats() {
+  const r = await api('GET', '/admin/stats');
+  if (!r.ok) return;
+  const s = r.d;
+  document.getElementById('d-users').textContent = s.total_users?.toLocaleString();
+  document.getElementById('d-bal').textContent = s.total_balance?.toLocaleString('ru') + ' UZS';
+  document.getElementById('d-profit').textContent = s.daily_profit?.toLocaleString('ru') + ' UZS';
+  document.getElementById('d-active').textContent = s.active_users_today;
+  document.getElementById('tw').innerHTML = s.top_winners?.map(u =>
+    `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span>${u.login}</span><span style="color:var(--green)">${u.wins?.toLocaleString('ru')} UZS</span>
+    </div>`).join('') || '—';
+  document.getElementById('tl').innerHTML = s.top_losers?.map(u =>
+    `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span>${u.login}</span><span style="color:var(--red)">${u.losses?.toLocaleString('ru')} UZS</span>
+    </div>`).join('') || '—';
+}
+
+async function loadPend() {
+  const r = await api('GET', '/admin/transactions/pending');
+  if (!r.ok) return;
+  const tb = document.getElementById('pt');
+  if (!r.d.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">Kutayotganlar yo\'q ✅</td></tr>'; return; }
+  tb.innerHTML = r.d.map(t => `
+    <tr>
+      <td>#${t.id}</td>
+      <td><b>${t.user_login}</b><br><small style="color:var(--text2)">${t.telegram_id}</small></td>
+      <td>${t.type === 'deposit' ? '➕ Depozit' : '➖ Yechish'}</td>
+      <td><b>${t.amount?.toLocaleString('ru')} UZS</b></td>
+      <td style="color:var(--text2);font-size:11px">${new Date(t.created_at).toLocaleString('ru')}</td>
+      <td>
+        <button class="btn btn-ok btn-sm" onclick="appTxn(${t.id})" style="margin-right:4px">✅</button>
+        <button class="btn btn-bad btn-sm" onclick="rejTxn(${t.id})">❌</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function appTxn(id) {
+  const r = await api('POST', `/admin/transactions/${id}/approve`, {});
+  if (r.ok) { toast('✅ Tasdiqlandi!', 'ok'); loadPend(); loadStats(); }
+  else toast('❌ Xato!', 'err');
+}
+async function rejTxn(id) {
+  const r = await api('POST', `/admin/transactions/${id}/reject`, {});
+  if (r.ok) { toast('Rad etildi', 'ok'); loadPend(); }
+}
+
+async function loadU(search = '') {
+  const url = search ? `/admin/users?search=${encodeURIComponent(search)}` : '/admin/users?limit=50';
+  const r = await api('GET', url);
+  if (!r.ok) return;
+  document.getElementById('ut').innerHTML = r.d.map(u => `
+    <tr>
+      <td>${u.id}</td>
+      <td><b>${u.login}</b></td>
+      <td>${u.telegram_id}</td>
+      <td style="color:var(--accent)">${u.balance?.toLocaleString('ru')}</td>
+      <td style="color:var(--green)">${u.total_wins?.toLocaleString('ru')}</td>
+      <td><span class="badge ${u.status==='active'?'ba':u.status==='blocked'?'br':'bp'}">${u.status}</span></td>
+      <td><button class="btn btn-sm" onclick="openUM(${u.id},'${u.login}','${u.status}',${u.balance})" style="background:var(--bg2)">Boshqar</button></td>
+    </tr>`).join('');
+}
+
+let st;
+function searchU() {
+  clearTimeout(st);
+  st = setTimeout(() => loadU(document.getElementById('us').value), 400);
+}
+
+function openUM(id, login, status, bal) {
+  selUid = id;
+  document.getElementById('um-body').innerHTML = `
+    <div style="margin-bottom:14px;padding:12px;background:var(--bg2);border-radius:10px">
+      <b>${login}</b> | Balans: ${bal?.toLocaleString('ru')} UZS<br>
+      <span class="badge ${status==='active'?'ba':status==='blocked'?'br':'bp'}">${status}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <button class="btn btn-bad" onclick="ua('block')">🚫 Bloklash</button>
+      <button class="btn btn-ok" onclick="ua('unblock')">✅ Blokdan chiqarish</button>
+      <button class="btn" onclick="ua('freeze')" style="background:var(--blue)">🧊 Muzlatish</button>
+      <button class="btn" onclick="ua('game-ban')" style="background:#ff6b35">⛔ O'yin taqiq</button>
+    </div>
+    <div class="fi" style="margin-bottom:10px">
+      <label>Balans qo'shish (+) / ayirish (-)</label>
+      <input type="number" id="bam" placeholder="50000">
+    </div>
+    <button class="btn btn-acc" onclick="addBal()" style="width:100%">Balans o'zgartirish</button>`;
+  document.getElementById('um').style.display = 'flex';
+}
+
+async function ua(action) {
+  const r = await api('POST', `/admin/users/${action}`, { user_id: selUid });
+  if (r.ok) { toast('✅ Bajarildi!', 'ok'); loadU(); document.getElementById('um').style.display = 'none'; }
+  else toast('❌ Xato!', 'err');
+}
+
+async function addBal() {
+  const am = parseFloat(document.getElementById('bam').value);
+  if (!am) return;
+  const r = await api('POST', `/admin/users/add-balance?user_id=${selUid}&amount=${am}`, {});
+  if (r.ok) { toast('✅ Balans yangilandi!', 'ok'); loadU(); document.getElementById('um').style.display = 'none'; }
+}
+
+async function createPromo() {
+  const r = await api('POST', '/admin/promo/create', {
+    code: document.getElementById('pc').value.trim(),
+    bonus_type: document.getElementById('pt2').value,
+    bonus_value: parseFloat(document.getElementById('pv').value),
+    max_uses: parseInt(document.getElementById('pu').value) || null,
+    expires_days: parseInt(document.getElementById('pd').value) || null,
+    min_deposit: parseFloat(document.getElementById('pm').value) || 0,
+    require_subscription: document.getElementById('ps').checked
+  });
+  if (r.ok) { toast('✅ ' + r.d.code + ' yaratildi!', 'ok'); loadPromos(); }
+  else toast(r.d.detail || '❌ Xato!', 'err');
+}
+
+async function loadPromos() {
+  const r = await api('GET', '/admin/promo/list');
+  if (!r.ok) return;
+  document.getElementById('promt').innerHTML = r.d.map(p => `
+    <tr>
+      <td><code>${p.code}</code></td>
+      <td>${p.bonus_type === 'percentage' ? p.bonus_value + '%' : p.bonus_value?.toLocaleString('ru') + ' UZS'}</td>
+      <td>${p.current_uses}/${p.max_uses || '∞'}</td>
+      <td>${p.expires_at ? new Date(p.expires_at).toLocaleDateString('ru') : '∞'}</td>
+      <td><span class="badge ${p.is_active ? 'ba' : 'br'}">${p.is_active ? 'Aktiv' : 'Tugagan'}</span></td>
+    </tr>`).join('');
+}
+
+async function addCh() {
+  const r = await api('POST', '/admin/channels/add', {
+    channel_id: document.getElementById('ci').value,
+    channel_name: document.getElementById('cn').value,
+    channel_url: document.getElementById('cu').value
+  });
+  if (r.ok) { toast('✅ Kanal qo\'shildi!', 'ok'); loadChs(); }
+  else toast('❌ Xato!', 'err');
+}
+
+async function loadChs() {
+  const r = await api('GET', '/admin/channels');
+  if (!r.ok) return;
+  document.getElementById('chl').innerHTML = r.d.length
+    ? r.d.map(c => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div><b>${c.name}</b> <span style="color:var(--text2);font-size:12px">${c.channel_id}</span></div>
+        <div>
+          <a href="${c.url}" target="_blank" style="color:var(--blue);text-decoration:none;margin-right:10px;font-size:12px">Ko'rish</a>
+          <button class="btn btn-bad btn-sm" onclick="delCh(${c.id})">O'chirish</button>
+        </div>
+      </div>`).join('')
+    : '<div style="color:var(--text2)">Kanallar yo\'q</div>';
+}
+
+async function delCh(id) {
+  const r = await api('DELETE', `/admin/channels/${id}`);
+  if (r.ok) { toast('O\'chirildi', 'ok'); loadChs(); }
+}
+
+async function createAd() {
+  const r = await api('POST', '/admin/ads/create', {
+    type: document.getElementById('at').value,
+    title: document.getElementById('ati').value,
+    content: document.getElementById('ac').value,
+    image_url: document.getElementById('ai').value || null,
+    link: document.getElementById('al2').value || null
+  });
+  if (r.ok) { toast('✅ Reklama yaratildi!', 'ok'); loadAds(); }
+}
+
+async function loadAds() {
+  const r = await api('GET', '/admin/ads');
+  if (!r.ok) return;
+  document.getElementById('adst').innerHTML = r.d.map(a => `
+    <tr>
+      <td>${a.type}</td>
+      <td>${a.title}</td>
+      <td>${a.show_count}</td>
+      <td><span class="badge ${a.is_active ? 'ba' : 'br'}">${a.is_active ? 'Aktiv' : 'Nofaol'}</span></td>
+    </tr>`).join('');
+}
+
+let tt;
+function toast(msg, type = '') {
+  const el = document.getElementById('t');
+  el.textContent = msg; el.className = 'toast show ' + type;
+  clearTimeout(tt);
+  tt = setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

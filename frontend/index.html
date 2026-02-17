@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Casino</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #12121a;
+      --card: #1a1a28;
+      --border: #2a2a3d;
+      --accent: #f5a623;
+      --accent2: #ff6b35;
+      --green: #00e676;
+      --red: #ff1744;
+      --blue: #448aff;
+      --text: #ffffff;
+      --text2: #8888aa;
+      --radius: 16px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .screen {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== LOGIN ===== */
+    #login-screen {
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      background: radial-gradient(ellipse at 50% 30%, #1a1a40 0%, #0a0a0f 70%);
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .login-logo .ico {
+      font-size: 72px;
+      display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-10px)
+      }
+    }
+
+    .login-logo h1 {
+      font-size: 34px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #f5a623, #ff6b35);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+    }
+
+    .login-logo p {
+      color: var(--text2);
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
+    .inp-wrap {
+      margin-bottom: 14px;
+    }
+
+    .inp-wrap label {
+      display: block;
+      color: var(--text2);
+      font-size: 12px;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .inp-wrap input {
+      width: 100%;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-size: 16px;
+      outline: none;
+      transition: border .2s;
+    }
+
+    .inp-wrap input:focus {
+      border-color: var(--accent);
+    }
+
+    .login-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #f5a623, #ff6b35);
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      color: #000;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+
+    .login-btn:active {
+      opacity: .9;
+      transform: scale(.99);
+    }
+
+    .err {
+      color: var(--red);
+      font-size: 13px;
+      margin-top: 8px;
+      text-align: center;
+      display: none;
+    }
+
+    .login-hint {
+      text-align: center;
+      color: var(--text2);
+      font-size: 12px;
+      margin-top: 16px;
+      line-height: 1.6;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .h-logo {
+      font-size: 18px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #f5a623, #ff6b35);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .h-bal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* ===== NAV ===== */
+    .bottom-nav {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-i {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 0 8px;
+      cursor: pointer;
+      color: var(--text2);
+      gap: 3px;
+      transition: color .2s;
+    }
+
+    .nav-i.on {
+      color: var(--accent);
+    }
+
+    .nav-i svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .nav-i span {
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .content {
+      padding: 16px;
+      padding-bottom: 90px;
+    }
+
+    /* ===== GAMES GRID ===== */
+    .sec-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .g-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+    }
+
+    .g-card:active {
+      transform: scale(.97);
+    }
+
+    .g-card .g-img {
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+      position: relative;
+    }
+
+    .g-aviator .g-img {
+      background: linear-gradient(135deg, #0d1b4b, #1a1060);
+    }
+
+    .g-mines .g-img {
+      background: linear-gradient(135deg, #1a0a2e, #2e0a0a);
+    }
+
+    .g-apple .g-img {
+      background: linear-gradient(135deg, #062006, #1a3a0a);
+    }
+
+    .g-card .g-info {
+      padding: 10px 12px;
+    }
+
+    .g-name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .g-rtp {
+      color: var(--text2);
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .g-wide {
+      grid-column: span 2;
+    }
+
+    /* ===== GAME SCREEN ===== */
+    #game-screen {
+      background: var(--bg);
+    }
+
+    .g-header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .back-btn {
+      background: var(--card);
+      border: none;
+      border-radius: 10px;
+      padding: 8px 14px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .g-h-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .g-h-bal {
+      margin-left: auto;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    /* ===== BET PANEL ===== */
+    .bet-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .bet-lbl {
+      color: var(--text2);
+      font-size: 12px;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .bet-inp {
+      width: 100%;
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 700;
+      outline: none;
+      text-align: center;
+    }
+
+    .bet-inp:focus {
+      border-color: var(--accent);
+    }
+
+    .bet-quick {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .bq {
+      flex: 1;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 4px;
+      color: var(--text2);
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 600;
+      transition: all .15s;
+    }
+
+    .bq:active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .play-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #f5a623, #ff6b35);
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      color: #000;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: opacity .2s;
+    }
+
+    .play-btn:disabled {
+      background: var(--border);
+      color: var(--text2);
+      cursor: not-allowed;
+    }
+
+    .play-btn:active:not(:disabled) {
+      opacity: .9;
+    }
+
+    .cash-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #00e676, #00bcd4);
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      color: #000;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: transform .1s;
+    }
+
+    .cash-btn:active {
+      transform: scale(.98);
+    }
+
+    /* ===== AVIATOR ===== */
+    .avi-sky {
+      background: linear-gradient(180deg, #060620 0%, #0d1b4b 60%, #1a1060 100%);
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      position: relative;
+      height: 240px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stars {
+      position: absolute;
+      inset: 0;
+    }
+
+    .star {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle var(--d) infinite;
+    }
+
+    @keyframes twinkle {
+
+      0%,
+      100% {
+        opacity: .2
+      }
+
+      50% {
+        opacity: 1
+      }
+    }
+
+    .avi-plane {
+      font-size: 44px;
+      position: absolute;
+      z-index: 3;
+      filter: drop-shadow(0 0 12px rgba(255, 165, 0, .9));
+      transition: left .15s, bottom .15s;
+    }
+
+    .avi-trail {
+      position: absolute;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(255, 107, 53, .7));
+      border-radius: 2px;
+      z-index: 2;
+      transition: width .15s;
+    }
+
+    .mult-big {
+      font-size: 66px;
+      font-weight: 900;
+      z-index: 4;
+      text-align: center;
+      text-shadow: 0 0 40px currentColor;
+    }
+
+    .mult-big.fly {
+      color: var(--green);
+    }
+
+    .mult-big.crash {
+      color: var(--red);
+      animation: shake .4s;
+    }
+
+    .mult-big.wait {
+      color: var(--accent);
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0)
+      }
+
+      20%,
+      60% {
+        transform: translateX(-8px)
+      }
+
+      40%,
+      80% {
+        transform: translateX(8px)
+      }
+    }
+
+    .avi-sub {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      color: var(--text2);
+      font-size: 13px;
+      z-index: 4;
+    }
+
+    .recent-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      margin-bottom: 12px;
+      padding: 2px 0;
+      scrollbar-width: none;
+    }
+
+    .recent-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .rb {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid;
+    }
+
+    .rb.lo {
+      color: #ff6b35;
+      border-color: #ff6b35;
+    }
+
+    .rb.mi {
+      color: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .rb.hi {
+      color: var(--green);
+      border-color: var(--green);
+    }
+
+    .auto-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .auto-row label {
+      color: var(--text2);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .auto-row input {
+      flex: 1;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    /* ===== MINES ===== */
+    .mines-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    .mc {
+      aspect-ratio: 1;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      cursor: pointer;
+      transition: all .15s;
+      user-select: none;
+    }
+
+    .mc.open:not(.hit):not(.shown):hover {
+      background: rgba(255, 255, 255, .05);
+      border-color: var(--accent);
+      transform: scale(1.04);
+    }
+
+    .mc.safe {
+      background: rgba(0, 50, 0, .6);
+      border-color: var(--green);
+      animation: pop .2s;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(.8)
+      }
+
+      60% {
+        transform: scale(1.1)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    .mc.hit {
+      background: rgba(80, 0, 0, .6);
+      border-color: var(--red);
+      animation: boom .3s;
+    }
+
+    @keyframes boom {
+      0% {
+        transform: scale(1)
+      }
+
+      40% {
+        transform: scale(1.3)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    .mc.shown {
+      background: rgba(40, 0, 0, .4);
+      border-color: #550000;
+    }
+
+    .m-cfg {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .m-cfg label {
+      color: var(--text2);
+      font-size: 12px;
+    }
+
+    .mcb {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 11px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all .15s;
+    }
+
+    .mcb.sel {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    .m-stats {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .ms {
+      text-align: center;
+    }
+
+    .ms-v {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .ms-l {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 1px;
+    }
+
+    /* ===== APPLE ===== */
+    .apple-tree {
+      background: linear-gradient(180deg, #040f04 0%, #061406 100%);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+      min-height: 200px;
+    }
+
+    .a-lvl {
+      margin-bottom: 12px;
+    }
+
+    .a-lvl-hdr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+
+    .a-lvl-n {
+      color: var(--text2);
+      font-size: 12px;
+    }
+
+    .a-mult {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .a-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .a-item {
+      width: 72px;
+      height: 72px;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all .2s;
+      background: rgba(255, 255, 255, .04);
+    }
+
+    .a-item.act:hover {
+      border-color: var(--green);
+      background: rgba(0, 230, 118, .08);
+      transform: scale(1.06);
+    }
+
+    .a-item.act:active {
+      transform: scale(.96);
+    }
+
+    .a-item.good {
+      background: rgba(0, 230, 118, .12);
+      border-color: var(--green);
+    }
+
+    .a-item.bad {
+      background: rgba(255, 23, 68, .12);
+      border-color: var(--red);
+    }
+
+    .a-item.lock {
+      opacity: .25;
+      cursor: not-allowed;
+    }
+
+    .a-item span {
+      font-size: 34px;
+    }
+
+    .a-prog {
+      margin-bottom: 12px;
+    }
+
+    .a-prog-bar {
+      background: var(--card);
+      border-radius: 20px;
+      height: 7px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .a-prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--accent));
+      border-radius: 20px;
+      transition: width .4s;
+    }
+
+    /* ===== PROFILE ===== */
+    .prof-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    .prof-av {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #f5a623, #ff6b35);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 12px;
+    }
+
+    .prof-name {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .prof-login {
+      color: var(--text2);
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
+    .s-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .s-box {
+      background: var(--bg2);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .s-v {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .s-l {
+      font-size: 11px;
+      color: var(--text2);
+    }
+
+    .act-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .act-btn {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: border .2s;
+    }
+
+    .act-btn:active {
+      border-color: var(--accent);
+    }
+
+    .act-btn .ai {
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+
+    .act-btn .al {
+      font-size: 12px;
+      color: var(--text2);
+    }
+
+    /* ===== MODAL ===== */
+    .modal-ov {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .75);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+    }
+
+    .modal-ov.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg2);
+      border-radius: 20px 20px 0 0;
+      padding: 22px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      animation: up .3s;
+    }
+
+    @keyframes up {
+      from {
+        transform: translateY(100%)
+      }
+
+      to {
+        transform: translateY(0)
+      }
+    }
+
+    .modal-t {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-x {
+      background: var(--card);
+      border: none;
+      border-radius: 8px;
+      width: 30px;
+      height: 30px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    /* ===== WIN OVERLAY ===== */
+    .win-ov {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .88);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .win-ov.show {
+      display: flex;
+    }
+
+    .win-box {
+      text-align: center;
+      animation: wpop .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    @keyframes wpop {
+      0% {
+        transform: scale(.3);
+        opacity: 0
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    .win-e {
+      font-size: 80px;
+      margin-bottom: 10px;
+    }
+
+    .win-am {
+      font-size: 52px;
+      font-weight: 900;
+      color: var(--accent);
+      text-shadow: 0 0 40px rgba(245, 166, 35, .8);
+    }
+
+    .win-mx {
+      font-size: 22px;
+      color: var(--text2);
+      margin-bottom: 20px;
+    }
+
+    .win-cl {
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      padding: 14px 44px;
+      color: #000;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 9999;
+      transition: transform .3s;
+      white-space: nowrap;
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.ok {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .toast.err {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .toast.win {
+      border-color: var(--accent);
+      color: var(--accent);
+      font-size: 16px;
+    }
+
+    /* ===== TRANSACTIONS LIST ===== */
+    .txn-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .05);
+    }
+
+    .txn-row:last-child {
+      border: none;
+    }
+
+    .txn-type {
+      font-size: 13px;
+    }
+
+    .txn-am {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .txn-st {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 10px;
+    }
+
+    .st-pending {
+      background: rgba(245, 166, 35, .15);
+      color: var(--accent);
+    }
+
+    .st-approved {
+      background: rgba(0, 230, 118, .15);
+      color: var(--green);
+    }
+
+    .st-rejected {
+      background: rgba(255, 23, 68, .15);
+      color: var(--red);
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar {
+      width: 3px;
+      height: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 2px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============ LOGIN ============ -->
+  <div id="login-screen" class="screen active">
+    <div class="login-box">
+      <div class="login-logo">
+        <span class="ico">🎰</span>
+        <h1>CASINO</h1>
+        <p>Real o'yinlar · Real yutuqlar</p>
+      </div>
+      <div class="inp-wrap">
+        <label>Login</label>
+        <input type="text" id="li" placeholder="Loginингизни киритинг" autocomplete="off" autocorrect="off"
+          autocapitalize="off">
+      </div>
+      <div class="inp-wrap">
+        <label>Parol</label>
+        <input type="password" id="lp" placeholder="Паролингизни киритинг">
+      </div>
+      <div class="err" id="lerr">Login yoki parol noto'g'ri</div>
+      <button class="login-btn" onclick="doLogin()">KIRISH</button>
+      <div class="login-hint">Login va parolni olish uchun Telegram botga<br><b>/start</b> yuboring</div>
+    </div>
+  </div>
+
+  <!-- ============ MAIN APP ============ -->
+  <div id="app-screen" class="screen">
+    <div class="header">
+      <div class="h-logo">🎰 CASINO</div>
+      <div class="h-bal" onclick="refreshBal()">💰 <span id="hbal">0</span> UZS</div>
+    </div>
+
+    <!-- HOME TAB -->
+    <div id="tab-home" class="content">
+      <div class="sec-title">🎮 O'yinlar</div>
+      <div class="games-grid">
+        <div class="g-card g-aviator" onclick="openGame('aviator')">
+          <div class="g-img">✈️</div>
+          <div class="g-info">
+            <div class="g-name">Aviator</div>
+            <div class="g-rtp">Maks: 1000x · RTP 97%</div>
+          </div>
+        </div>
+        <div class="g-card g-mines" onclick="openGame('mines')">
+          <div class="g-img">💣</div>
+          <div class="g-info">
+            <div class="g-name">Mines</div>
+            <div class="g-rtp">5×5 maydon · RTP 97%</div>
+          </div>
+        </div>
+        <div class="g-card g-apple g-wide" onclick="openGame('apple')">
+          <div class="g-img">🍎</div>
+          <div class="g-info">
+            <div class="g-name">Apple of Fortune</div>
+            <div class="g-rtp">5 qavat · RTP 96%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-title" style="margin-top:22px">📊 So'nggi o'yinlar</div>
+      <div id="recent-games">
+        <div style="color:var(--text2);font-size:13px;padding:10px 0">Yuklanmoqda...</div>
+      </div>
+    </div>
+
+    <!-- PROFILE TAB -->
+    <div id="tab-profile" class="content" style="display:none">
+      <div class="prof-card">
+        <div class="prof-av">👤</div>
+        <div class="prof-name" id="pname">—</div>
+        <div class="prof-login" id="plogin">—</div>
+        <div class="s-grid">
+          <div class="s-box">
+            <div class="s-v" id="pbal" style="color:var(--accent)">0</div>
+            <div class="s-l">Balans (UZS)</div>
+          </div>
+          <div class="s-box">
+            <div class="s-v" id="pwins" style="color:var(--green)">0</div>
+            <div class="s-l">Jami yutuq</div>
+          </div>
+          <div class="s-box">
+            <div class="s-v" id="plosses" style="color:var(--red)">0</div>
+            <div class="s-l">Jami yutqazish</div>
+          </div>
+          <div class="s-box">
+            <div class="s-v" id="pnet">0</div>
+            <div class="s-l">Sof natija</div>
+          </div>
+        </div>
+      </div>
+      <div class="act-btns" style="margin-bottom:14px">
+        <div class="act-btn" onclick="openModal('dep-modal')">
+          <div class="ai">➕</div>
+          <div class="al">To'ldirish</div>
+        </div>
+        <div class="act-btn" onclick="openModal('wd-modal')">
+          <div class="ai">➖</div>
+          <div class="al">Yechish</div>
+        </div>
+        <div class="act-btn" onclick="loadTxns()">
+          <div class="ai">📋</div>
+          <div class="al">Tarix</div>
+        </div>
+      </div>
+      <div id="txn-list"></div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <div class="nav-i on" id="nav-home" onclick="switchTab('home')">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+        </svg>
+        <span>Asosiy</span>
+      </div>
+      <div class="nav-i" id="nav-profile" onclick="switchTab('profile')">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+        </svg>
+        <span>Profil</span>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ============ GAME SCREEN ============ -->
+  <div id="game-screen" class="screen">
+    <div class="g-header">
+      <button class="back-btn" onclick="closeGame()">← Orqaga</button>
+      <div class="g-h-title" id="g-title">O'yin</div>
+      <div class="g-h-bal">💰 <span id="g-bal">0</span></div>
+    </div>
+    <div class="content" id="g-content" style="padding-bottom:20px"></div>
+  </div>
+
+  <!-- ============ WIN OVERLAY ============ -->
+  <div class="win-ov" id="win-ov" onclick="closeWin()">
+    <div class="win-box">
+      <div class="win-e">🏆</div>
+      <div class="win-am" id="win-am">+0</div>
+      <div class="win-mx" id="win-mx">x1.00</div>
+      <button class="win-cl">DAVOM ETISH</button>
+    </div>
+  </div>
+
+  <!-- ============ TOAST ============ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ============ DEPOSIT MODAL ============ -->
+  <div class="modal-ov" id="dep-modal">
+    <div class="modal">
+      <div class="modal-t">➕ Balans to'ldirish <button class="modal-x" onclick="closeModal('dep-modal')">✕</button>
+      </div>
+      <div class="inp-wrap">
+        <label>Summa (UZS)</label>
+        <input type="number" id="dep-am" class="bet-inp" placeholder="100 000" style="width:100%">
+      </div>
+      <div class="bet-quick" style="margin-bottom:16px">
+        <div class="bq" onclick="document.getElementById('dep-am').value=50000">50K</div>
+        <div class="bq" onclick="document.getElementById('dep-am').value=100000">100K</div>
+        <div class="bq" onclick="document.getElementById('dep-am').value=500000">500K</div>
+        <div class="bq" onclick="document.getElementById('dep-am').value=1000000">1M</div>
+      </div>
+      <div style="background:var(--card);border-radius:12px;padding:14px;margin-bottom:16px">
+        <div style="color:var(--text2);font-size:12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">
+          To'lov ma'lumotlari</div>
+        <div style="font-size:16px;font-weight:700">💳 5614 6835 8227 9246</div>
+        <div style="color:var(--text2);font-size:13px;margin-top:4px">Egasi: Casino Admin</div>
+        <div style="color:var(--accent);font-size:12px;margin-top:8px">⚠️ To'lovdan keyin chekni yuboring!</div>
+      </div>
+      <div class="inp-wrap">
+        <label>Izoh (ixtiyoriy)</label>
+        <input type="text" id="dep-note" placeholder="To'lov ID yoki izoh"
+          style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-size:14px;outline:none">
+      </div>
+      <button class="play-btn" onclick="submitDep()" style="margin-top:10px">So'rov yuborish</button>
+    </div>
+  </div>
+
+  <!-- ============ WITHDRAW MODAL ============ -->
+  <div class="modal-ov" id="wd-modal">
+    <div class="modal">
+      <div class="modal-t">➖ Pul yechish <button class="modal-x" onclick="closeModal('wd-modal')">✕</button></div>
+      <div class="inp-wrap">
+        <label>Summa (UZS) — minimal 50,000</label>
+        <input type="number" id="wd-am" class="bet-inp" placeholder="50 000" style="width:100%">
+      </div>
+      <div class="bet-quick" style="margin-bottom:14px">
+        <div class="bq" onclick="document.getElementById('wd-am').value=50000">50K</div>
+        <div class="bq" onclick="document.getElementById('wd-am').value=100000">100K</div>
+        <div class="bq" onclick="document.getElementById('wd-am').value=500000">500K</div>
+      </div>
+      <div class="inp-wrap">
+        <label>Karta raqami</label>
+        <input type="text" id="wd-card" placeholder="8600 0000 0000 0000"
+          style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-size:16px;outline:none">
+      </div>
+      <button class="play-btn" onclick="submitWd()" style="margin-top:14px">So'rov yuborish</button>
+    </div>
+  </div>
+
+  <!-- ============ TRANSACTIONS MODAL ============ -->
+  <div class="modal-ov" id="txn-modal">
+    <div class="modal">
+      <div class="modal-t">📋 Tranzaksiyalar <button class="modal-x" onclick="closeModal('txn-modal')">✕</button></div>
+      <div id="txn-modal-body">
+        <div style="text-align:center;color:var(--text2);padding:20px">Yuklanmoqda...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============ CONFIG ============
+    const API = 'https://qwertyuz-production.up.railway.app/api';
+
+    let token = localStorage.getItem('c_tok');
+    let user = null;
+    let gs = {}; // game state
+
+    // ============ INIT ============
+    window.onload = async () => {
+      if (window.Telegram?.WebApp) {
+        Telegram.WebApp.expand();
+        Telegram.WebApp.setHeaderColor('#0a0a0f');
+        Telegram.WebApp.setBackgroundColor('#0a0a0f');
+      }
+      // Draw stars
+      drawStars();
+      if (token) {
+        const ok = await loadUser();
+        if (ok) showApp();
+        else { localStorage.removeItem('c_tok'); token = null; }
+      }
+    };
+
+    function drawStars() {
+      // Pre-generate stars for aviator (added dynamically when game opens)
+    }
+
+    // ============ API ============
+    async function api(method, path, data) {
+      try {
+        const opts = { method, headers: { 'Content-Type': 'application/json' } };
+        if (token) opts.headers['Authorization'] = `Bearer ${token}`;
+        if (data) opts.body = JSON.stringify(data);
+        const r = await fetch(API + path, opts);
+        const j = await r.json();
+        return { d: j, ok: r.ok, status: r.status };
+      } catch (e) {
+        return { d: { detail: 'Server bilan aloqa yo\'q' }, ok: false, status: 0 };
+      }
+    }
+
+    async function loadUser() {
+      const r = await api('GET', '/auth/me');
+      if (r.ok) { user = r.d; updBal(); return true; }
+      return false;
+    }
+
+    function updBal() {
+      if (!user) return;
+      const b = Math.floor(user.balance).toLocaleString('ru');
+      document.getElementById('hbal').textContent = b;
+      document.getElementById('g-bal').textContent = b;
+      document.getElementById('pbal').textContent = b;
+      document.getElementById('pname').textContent = user.username || user.login;
+      document.getElementById('plogin').textContent = 'Login: ' + user.login;
+      document.getElementById('pwins').textContent = Math.floor(user.total_wins).toLocaleString('ru');
+      document.getElementById('plosses').textContent = Math.floor(user.total_losses).toLocaleString('ru');
+      const net = user.total_wins - user.total_losses;
+      const el = document.getElementById('pnet');
+      el.textContent = (net >= 0 ? '+' : '') + Math.floor(net).toLocaleString('ru');
+      el.style.color = net >= 0 ? 'var(--green)' : 'var(--red)';
+    }
+
+    async function refreshBal() {
+      await loadUser();
+      toast('Yangilandi ✓', 'ok');
+    }
+
+    // ============ AUTH ============
+    async function doLogin() {
+      const login = document.getElementById('li').value.trim();
+      const pass = document.getElementById('lp').value;
+      const err = document.getElementById('lerr');
+      err.style.display = 'none';
+      if (!login || !pass) { err.textContent = 'Login va parol kiriting'; err.style.display = 'block'; return; }
+
+      const btn = document.querySelector('.login-btn');
+      btn.textContent = 'Kirilmoqda...'; btn.disabled = true;
+
+      const r = await api('POST', '/auth/login', { login, password: pass });
+      btn.textContent = 'KIRISH'; btn.disabled = false;
+
+      if (r.ok) {
+        token = r.d.access_token;
+        localStorage.setItem('c_tok', token);
+        user = r.d.user;
+        showApp();
+      } else {
+        err.textContent = r.d.detail || 'Login yoki parol noto\'g\'ri';
+        err.style.display = 'block';
+      }
+    }
+
+    function showApp() {
+      document.getElementById('login-screen').classList.remove('active');
+      document.getElementById('app-screen').classList.add('active');
+      updBal();
+      loadRecent();
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && document.getElementById('login-screen').classList.contains('active')) doLogin();
+    });
+
+    // ============ NAV ============
+    function switchTab(t) {
+      document.getElementById('tab-home').style.display = t === 'home' ? 'block' : 'none';
+      document.getElementById('tab-profile').style.display = t === 'profile' ? 'block' : 'none';
+      document.querySelectorAll('.nav-i').forEach(n => n.classList.remove('on'));
+      document.getElementById('nav-' + t).classList.add('on');
+      if (t === 'profile') loadUser();
+    }
+
+    // ============ RECENT GAMES ============
+    async function loadRecent() {
+      const r = await api('GET', '/games/history?limit=8');
+      const el = document.getElementById('recent-games');
+      if (r.ok && r.d.length) {
+        const gnames = { aviator: '✈️ Aviator', mines: '💣 Mines', apple_fortune: '🍎 Apple' };
+        el.innerHTML = r.d.map(g => {
+          const isWin = g.result === 'win';
+          return `<div class="txn-row">
+        <span style="font-size:13px">${gnames[g.game_type] || g.game_type}</span>
+        <span style="color:var(--text2);font-size:13px">${Math.floor(g.bet).toLocaleString('ru')} UZS</span>
+        <span style="color:${isWin ? 'var(--green)' : 'var(--red)'};font-weight:700;font-size:13px">${isWin ? '+' + Math.floor(g.win).toLocaleString('ru') : '-' + Math.floor(g.bet).toLocaleString('ru')}</span>
+        <span style="color:var(--text2);font-size:12px">x${g.multiplier?.toFixed(2) || '—'}</span>
+      </div>`;
+        }).join('');
+      } else {
+        el.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:10px 0;text-align:center">Hali o\'yin o\'ynalmagan</div>';
+      }
+    }
+
+    // ============ GAMES ============
+    function openGame(game) {
+      if (gs.interval) clearInterval(gs.interval);
+      gs = {};
+      document.getElementById('app-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+      const titles = { aviator: '✈️ Aviator', mines: '💣 Mines', apple: '🍎 Apple of Fortune' };
+      document.getElementById('g-title').textContent = titles[game];
+      document.getElementById('g-bal').textContent = Math.floor(user?.balance || 0).toLocaleString('ru');
+      if (game === 'aviator') renderAviator();
+      else if (game === 'mines') renderMines();
+      else renderApple();
+    }
+
+    function closeGame() {
+      if (gs.interval) clearInterval(gs.interval);
+      gs = {};
+      document.getElementById('game-screen').classList.remove('active');
+      document.getElementById('app-screen').classList.add('active');
+      loadUser(); loadRecent();
+    }
+
+    function getBet() { return parseFloat(document.getElementById('bet-inp')?.value || 0); }
+    function setBet(v) { const el = document.getElementById('bet-inp'); if (el) el.value = v; }
+
+    // ============ AVIATOR ============
+    const recentCrashes = [1.24, 5.67, 1.02, 12.4, 1.8, 3.2, 1.0, 87.5, 2.1, 1.5, 4.3, 1.1];
+
+    function renderAviator() {
+      document.getElementById('g-content').innerHTML = `
+    <div class="recent-row" id="rr">${recentCrashes.map(r => {
+        const cls = r < 2 ? 'lo' : r < 10 ? 'mi' : 'hi';
+        return `<div class="rb ${cls}">${r.toFixed(2)}x</div>`;
+      }).join('')}</div>
+
+    <div class="avi-sky" id="avi-sky">
+      <div class="stars" id="avi-stars"></div>
+      <div class="avi-trail" id="avi-trail" style="width:0;bottom:25%;left:0"></div>
+      <div class="avi-plane" id="avi-plane" style="left:8%;bottom:22%">✈️</div>
+      <div style="position:absolute;z-index:4;text-align:center">
+        <div class="mult-big wait" id="avi-mult">1.00x</div>
+        <div style="color:var(--text2);font-size:13px;margin-top:4px" id="avi-sub">Pul tikish...</div>
+      </div>
+      <div class="avi-sub" id="avi-sub2"></div>
+    </div>
+
+    <div class="bet-panel">
+      <div class="bet-lbl">Tikish summasi (UZS)</div>
+      <input type="number" id="bet-inp" class="bet-inp" value="10000" min="1000" step="1000">
+      <div class="bet-quick">
+        <div class="bq" onclick="setBet(5000)">5K</div>
+        <div class="bq" onclick="setBet(10000)">10K</div>
+        <div class="bq" onclick="setBet(50000)">50K</div>
+        <div class="bq" onclick="setBet(100000)">100K</div>
+      </div>
+      <div class="auto-row">
+        <label>Auto cashout:</label>
+        <input type="number" id="auto-co" placeholder="2.00" step="0.1" min="1.1">
+      </div>
+    </div>
+
+    <button class="play-btn" id="avi-play" onclick="aviBet()">✈️ PARVOZ QILISH</button>
+    <button class="cash-btn" id="avi-cash" onclick="aviCash()" style="display:none">
+      💰 CASHOUT — <span id="avi-cash-v">x1.00</span>
+    </button>`;
+
+      // Generate stars
+      const starsEl = document.getElementById('avi-stars');
+      for (let i = 0; i < 60; i++) {
+        const s = document.createElement('div');
+        s.className = 'star';
+        s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${Math.random() * 2 + 1}px;height:${s.style.width};--d:${Math.random() * 3 + 2}s;animation-delay:${Math.random() * 3}s`;
+        starsEl.appendChild(s);
+      }
+    }
+
+    async function aviBet() {
+      const bet = getBet();
+      if (bet < 1000) { toast('Minimal: 1,000 UZS', 'err'); return; }
+      if (bet > user.balance) { toast('Balans yetarli emas!', 'err'); return; }
+
+      const autoCo = parseFloat(document.getElementById('auto-co').value) || null;
+      document.getElementById('avi-play').disabled = true;
+      document.getElementById('avi-sub').textContent = 'Yuklanmoqda...';
+
+      const r = await api('POST', '/games/aviator/start', { bet, auto_cashout: autoCo });
+      if (!r.ok) {
+        toast(r.d.detail || 'Xato!', 'err');
+        document.getElementById('avi-play').disabled = false;
+        return;
+      }
+
+      user.balance -= bet; updBal();
+      gs = { sid: r.d.session_id, crashAt: r.d.crash_at, bet, mult: 1.0, cashedOut: false };
+
+      if (r.d.auto_result) {
+        const ar = r.d.auto_result;
+        if (ar.cashed_out) { user.balance = r.d.balance; updBal(); showWin(ar.win, ar.multiplier); }
+        else aviCrash(ar.crashed_at);
+        document.getElementById('avi-play').disabled = false;
+        return;
+      }
+
+      document.getElementById('avi-cash').style.display = 'block';
+      aviAnimate();
+    }
+
+    function aviAnimate() {
+      const multEl = document.getElementById('avi-mult');
+      const subEl = document.getElementById('avi-sub');
+      const cashEl = document.getElementById('avi-cash-v');
+      const planeEl = document.getElementById('avi-plane');
+      const trailEl = document.getElementById('avi-trail');
+      const cashBtn = document.getElementById('avi-cash');
+
+      multEl.className = 'mult-big fly';
+      subEl.textContent = '🔴 PARVOZDA — CASHOUT bosing!';
+
+      const start = Date.now();
+      if (gs.interval) clearInterval(gs.interval);
+
+      gs.interval = setInterval(() => {
+        const t = (Date.now() - start) / 1000;
+        const mult = parseFloat((Math.pow(1.0585, t * 10) * 0.99).toFixed(2));
+        gs.mult = mult;
+
+        multEl.textContent = mult.toFixed(2) + 'x';
+        cashEl.textContent = 'x' + mult.toFixed(2);
+
+        const px = Math.min(8 + t * 9, 78);
+        const py = Math.min(22 + t * 6, 72);
+        planeEl.style.left = px + '%';
+        planeEl.style.bottom = py + '%';
+        trailEl.style.width = px + '%';
+        trailEl.style.bottom = (py - 2) + '%';
+
+        if (mult >= gs.crashAt) {
+          clearInterval(gs.interval);
+          if (!gs.cashedOut) aviCrash(gs.crashAt);
+        }
+      }, 100);
+    }
+
+    function aviCrash(at) {
+      if (gs.interval) clearInterval(gs.interval);
+      const multEl = document.getElementById('avi-mult');
+      const subEl = document.getElementById('avi-sub');
+      const planeEl = document.getElementById('avi-plane');
+
+      multEl.className = 'mult-big crash';
+      multEl.textContent = at.toFixed(2) + 'x';
+      subEl.textContent = '💥 Qulab tushdi!';
+      planeEl.textContent = '💥';
+
+      document.getElementById('avi-cash').style.display = 'none';
+
+      recentCrashes.unshift(at);
+      if (recentCrashes.length > 12) recentCrashes.pop();
+      const rr = document.getElementById('rr');
+      if (rr) rr.innerHTML = recentCrashes.map(r => {
+        const cls = r < 2 ? 'lo' : r < 10 ? 'mi' : 'hi';
+        return `<div class="rb ${cls}">${r.toFixed(2)}x</div>`;
+      }).join('');
+
+      toast('💥 x' + at.toFixed(2) + ' da qulab tushdi!', 'err');
+
+      setTimeout(() => {
+        if (!document.getElementById('avi-mult')) return;
+        document.getElementById('avi-play').disabled = false;
+        multEl.className = 'mult-big wait';
+        multEl.textContent = '1.00x';
+        subEl.textContent = 'Pul tikish...';
+        planeEl.textContent = '✈️';
+        planeEl.style.left = '8%'; planeEl.style.bottom = '22%';
+        document.getElementById('avi-trail').style.width = '0';
+      }, 2500);
+    }
+
+    async function aviCash() {
+      if (gs.cashedOut) return;
+      clearInterval(gs.interval);
+      gs.cashedOut = true;
+      document.getElementById('avi-cash').style.display = 'none';
+
+      const r = await api('POST', '/games/aviator/cashout', { session_id: gs.sid, current_multiplier: gs.mult });
+
+      if (r.ok) {
+        if (r.d.success) { user.balance = r.d.balance; updBal(); showWin(r.d.win, r.d.multiplier); }
+        else aviCrash(r.d.crashed_at);
+      }
+
+      setTimeout(() => {
+        if (!document.getElementById('avi-play')) return;
+        document.getElementById('avi-play').disabled = false;
+        const me = document.getElementById('avi-mult');
+        if (me) { me.className = 'mult-big wait'; me.textContent = '1.00x'; }
+      }, 2000);
+    }
+
+    // ============ MINES ============
+    let mCount = 5;
+
+    function renderMines() {
+      document.getElementById('g-content').innerHTML = `
+    <div class="m-cfg">
+      <label>Minalar:</label>
+      ${[1, 3, 5, 10, 15, 20].map(n =>
+        `<div class="mcb ${n === 5 ? 'sel' : ''}" onclick="selMines(${n},this)">${n}</div>`
+      ).join('')}
+    </div>
+    <div class="m-stats">
+      <div class="ms"><div class="ms-v" id="m-mult">1.00x</div><div class="ms-l">Koeffitsient</div></div>
+      <div class="ms"><div class="ms-v" id="m-profit" style="color:var(--accent)">0</div><div class="ms-l">Potensial (UZS)</div></div>
+      <div class="ms"><div class="ms-v" id="m-opened" style="color:var(--blue)">0</div><div class="ms-l">Ochilgan</div></div>
+    </div>
+    <div class="mines-grid" id="mines-grid">
+      ${Array(25).fill(0).map((_, i) =>
+        `<div class="mc open" id="mc${i}" onclick="mReveal(${i})">💎</div>`
+      ).join('')}
+    </div>
+    <div class="bet-panel">
+      <div class="bet-lbl">Tikish summasi (UZS)</div>
+      <input type="number" id="bet-inp" class="bet-inp" value="10000" min="1000" step="1000">
+      <div class="bet-quick">
+        <div class="bq" onclick="setBet(5000)">5K</div>
+        <div class="bq" onclick="setBet(10000)">10K</div>
+        <div class="bq" onclick="setBet(50000)">50K</div>
+        <div class="bq" onclick="setBet(100000)">100K</div>
+      </div>
+    </div>
+    <button class="play-btn" id="m-play" onclick="mStart()">💣 BOSHLASH</button>
+    <button class="cash-btn" id="m-cash" onclick="mCash()" style="display:none">
+      💰 CASHOUT — <span id="m-cash-v">x1.00</span>
+    </button>`;
+      gs = { active: false };
+    }
+
+    function selMines(n, el) {
+      if (gs.active) return;
+      mCount = n;
+      document.querySelectorAll('.mcb').forEach(b => b.classList.remove('sel'));
+      el.classList.add('sel');
+    }
+
+    async function mStart() {
+      const bet = getBet();
+      if (bet < 1000) { toast('Minimal: 1,000 UZS', 'err'); return; }
+      if (bet > user.balance) { toast('Balans yetarli emas!', 'err'); return; }
+
+      document.getElementById('m-play').disabled = true;
+      const r = await api('POST', '/games/mines/start', { bet, mines_count: mCount });
+      if (!r.ok) { toast(r.d.detail || 'Xato!', 'err'); document.getElementById('m-play').disabled = false; return; }
+
+      user.balance -= bet; updBal();
+      gs = { active: true, sid: r.d.session_id, bet, revealed: [] };
+
+      document.getElementById('m-play').style.display = 'none';
+      document.getElementById('m-cash').style.display = 'block';
+      document.getElementById('m-mult').textContent = '1.00x';
+      document.getElementById('m-profit').textContent = '0';
+      document.getElementById('m-opened').textContent = '0';
+
+      for (let i = 0; i < 25; i++) {
+        const c = document.getElementById('mc' + i);
+        c.className = 'mc open'; c.textContent = '💎';
+      }
+    }
+
+    async function mReveal(idx) {
+      if (!gs.active || gs.revealed.includes(idx)) return;
+
+      const r = await api('POST', '/games/mines/reveal', { session_id: gs.sid, cell_index: idx });
+      if (!r.ok) { toast(r.d.detail || 'Xato!', 'err'); return; }
+
+      const cell = document.getElementById('mc' + idx);
+
+      if (r.d.hit_mine) {
+        cell.className = 'mc hit'; cell.textContent = '💥';
+        r.d.board.forEach((v, i) => {
+          if (v === 1 && i !== idx) {
+            const c = document.getElementById('mc' + i);
+            c.className = 'mc shown'; c.textContent = '💣';
+          }
+        });
+        gs.active = false;
+        document.getElementById('m-cash').style.display = 'none';
+        document.getElementById('m-play').style.display = 'block';
+        document.getElementById('m-play').disabled = false;
+        toast('💥 Mina! Yutqazdingiz!', 'err');
+      } else {
+        cell.className = 'mc safe'; cell.textContent = '💎';
+        gs.revealed.push(idx);
+        document.getElementById('m-mult').textContent = r.d.current_multiplier.toFixed(2) + 'x';
+        document.getElementById('m-opened').textContent = r.d.revealed_count;
+        document.getElementById('m-profit').textContent = Math.floor(gs.bet * r.d.current_multiplier).toLocaleString('ru');
+        document.getElementById('m-cash-v').textContent = 'x' + r.d.current_multiplier.toFixed(2);
+        toast('💎 Xavfsiz! x' + r.d.current_multiplier.toFixed(2), 'ok');
+      }
+    }
+
+    async function mCash() {
+      if (!gs.active) return;
+      const r = await api('POST', '/games/mines/cashout', { session_id: gs.sid });
+      if (!r.ok) { toast(r.d.detail || 'Xato!', 'err'); return; }
+
+      user.balance = r.d.balance; updBal();
+      gs.active = false;
+      document.getElementById('m-cash').style.display = 'none';
+      document.getElementById('m-play').style.display = 'block';
+      document.getElementById('m-play').disabled = false;
+      showWin(r.d.win, r.d.multiplier);
+    }
+
+    // ============ APPLE ============
+    let apSt = {};
+
+    function renderApple() {
+      document.getElementById('g-content').innerHTML = `
+    <div class="a-prog">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:var(--text2);font-size:13px">Daraja: <b id="a-lv">0/5</b></span>
+        <span style="color:var(--accent);font-weight:700;font-size:15px" id="a-mx">x1.0</span>
+      </div>
+      <div class="a-prog-bar"><div class="a-prog-fill" id="a-pf" style="width:0%"></div></div>
+    </div>
+    <div class="apple-tree" id="a-tree">
+      <div style="text-align:center;color:var(--text2);padding:30px 0;font-size:14px">Pul tikib o'yinni boshlang 🍎</div>
+    </div>
+    <div class="bet-panel">
+      <div class="bet-lbl">Tikish summasi (UZS)</div>
+      <input type="number" id="bet-inp" class="bet-inp" value="10000" min="1000" step="1000">
+      <div class="bet-quick">
+        <div class="bq" onclick="setBet(5000)">5K</div>
+        <div class="bq" onclick="setBet(10000)">10K</div>
+        <div class="bq" onclick="setBet(50000)">50K</div>
+        <div class="bq" onclick="setBet(100000)">100K</div>
+      </div>
+    </div>
+    <button class="play-btn" id="a-play" onclick="apStart()">🍎 BOSHLASH</button>
+    <button class="cash-btn" id="a-cash" onclick="apCash()" style="display:none">
+      💰 CASHOUT — <span id="a-cash-v">x1.0</span>
+    </button>`;
+    }
+
+    async function apStart() {
+      const bet = getBet();
+      if (bet < 1000) { toast('Minimal: 1,000 UZS', 'err'); return; }
+      if (bet > user.balance) { toast('Balans yetarli emas!', 'err'); return; }
+
+      document.getElementById('a-play').disabled = true;
+      const r = await api('POST', '/games/apple/start', { bet, levels: 5 });
+      if (!r.ok) { toast(r.d.detail || 'Xato!', 'err'); document.getElementById('a-play').disabled = false; return; }
+
+      user.balance -= bet; updBal();
+      apSt = { active: true, sid: r.d.session_id, bet, levels: r.d.levels, apples: r.d.apples_per_level, mults: r.d.multipliers, curLv: 0, picks: {} };
+
+      document.getElementById('a-play').style.display = 'none';
+      document.getElementById('a-cash').style.display = 'none';
+      drawAppleTree();
+    }
+
+    function drawAppleTree() {
+      const tree = document.getElementById('a-tree');
+      let html = '';
+      for (let lv = apSt.levels - 1; lv >= 0; lv--) {
+        const isCur = lv === apSt.curLv;
+        const isPast = lv < apSt.curLv;
+        const isFut = lv > apSt.curLv;
+        const mult = apSt.mults[lv];
+        const icon = isPast ? '✅' : isFut ? '🔒' : '🎯';
+
+        html += `<div class="a-lvl">
+      <div class="a-lvl-hdr">
+        <span class="a-lvl-n">${icon} Daraja ${lv + 1}</span>
+        <span class="a-mult">x${mult}</span>
+      </div>
+      <div class="a-row">`;
+
+        for (let i = 0; i < apSt.apples; i++) {
+          let cls = 'a-item';
+          let em = '🍎';
+          if (isCur && apSt.active) cls += ' act';
+          if (isFut) cls += ' lock';
+
+          const pick = apSt.picks[lv];
+          if (pick !== undefined && pick.idx === i) {
+            cls += pick.good ? ' good' : ' bad';
+            em = pick.good ? '✅' : '💀';
+          }
+
+          const click = (isCur && apSt.active) ? `onclick="apPick(${lv},${i})"` : '';
+          html += `<div class="${cls}" ${click}><span>${em}</span></div>`;
+        }
+        html += `</div></div>`;
+      }
+      tree.innerHTML = html;
+
+      document.getElementById('a-lv').textContent = apSt.curLv + '/' + apSt.levels;
+      document.getElementById('a-pf').style.width = (apSt.curLv / apSt.levels * 100) + '%';
+    }
+
+    async function apPick(lv, idx) {
+      if (!apSt.active || lv !== apSt.curLv) return;
+
+      const r = await api('POST', '/games/apple/pick', { session_id: apSt.sid, apple_index: idx });
+      if (!r.ok) { toast(r.d.detail || 'Xato!', 'err'); return; }
+
+      if (r.d.bad_apple) {
+        apSt.picks[lv] = { idx, good: false };
+        apSt.active = false;
+        drawAppleTree();
+        document.getElementById('a-cash').style.display = 'none';
+        document.getElementById('a-play').style.display = 'block';
+        document.getElementById('a-play').disabled = false;
+        toast('💀 Yomon olma! Yutqazdingiz!', 'err');
+      } else {
+        apSt.picks[lv] = { idx, good: true };
+        apSt.curLv = r.d.current_level;
+        document.getElementById('a-mx').textContent = 'x' + r.d.current_multiplier;
+        document.getElementById('a-cash-v').textContent = 'x' + r.d.current_multiplier;
+
+        if (r.d.completed) {
+          user.balance = r.d.balance; updBal();
+          apSt.active = false;
+          drawAppleTree();
+          document.getElementById('a-cash').style.display = 'none';
+          document.getElementById('a-play').style.display = 'block';
+          document.getElementById('a-play').disabled = false;
+          showWin(r.d.win, r.d.multiplier);
+        } else {
+          drawAppleTree();
+          document.getElementById('a-cash').style.display = 'block';
+          toast('✅ To\'g\'ri olma! x' + r.d.current_multiplier, 'ok');
+        }
+      }
+    }
+
+    async function apCash() {
+      if (!apSt.active) return;
+      const r = await api('POST', '/games/apple/cashout', { session_id: apSt.sid });
+      if (!r.ok) { toast(r.d.detail || 'Xato!', 'err'); return; }
+
+      user.balance = r.d.balance; updBal();
+      apSt.active = false;
+      document.getElementById('a-cash').style.display = 'none';
+      document.getElementById('a-play').style.display = 'block';
+      document.getElementById('a-play').disabled = false;
+      showWin(r.d.win, r.d.multiplier);
+    }
+
+    // ============ DEPOSIT / WITHDRAW ============
+    function openModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    async function submitDep() {
+      const am = parseFloat(document.getElementById('dep-am').value);
+      if (!am || am < 10000) { toast('Minimal: 10,000 UZS', 'err'); return; }
+      const note = document.getElementById('dep-note').value;
+
+      const r = await api('POST', '/balance/deposit', { amount: am, payment_method: 'card', payment_proof: note });
+      if (r.ok) { closeModal('dep-modal'); toast('✅ So\'rov yuborildi! Admin tasdiqlaydi.', 'ok'); }
+      else toast(r.d.detail || 'Xato!', 'err');
+    }
+
+    async function submitWd() {
+      const am = parseFloat(document.getElementById('wd-am').value);
+      const card = document.getElementById('wd-card').value.trim();
+      if (!am || am < 50000) { toast('Minimal: 50,000 UZS', 'err'); return; }
+      if (!card) { toast('Karta raqamini kiriting', 'err'); return; }
+
+      const r = await api('POST', '/balance/withdraw', { amount: am, payment_method: 'card', payment_details: card });
+      if (r.ok) {
+        user.balance = r.d.balance; updBal();
+        closeModal('wd-modal');
+        toast('✅ Yechish so\'rovi yuborildi!', 'ok');
+      } else toast(r.d.detail || 'Xato!', 'err');
+    }
+
+    // ============ TRANSACTIONS ============
+    async function loadTxns() {
+      openModal('txn-modal');
+      const r = await api('GET', '/balance/transactions?limit=20');
+      const el = document.getElementById('txn-modal-body');
+      if (!r.ok || !r.d.length) { el.innerHTML = '<div style="text-align:center;color:var(--text2);padding:20px">Tarix bo\'sh</div>'; return; }
+
+      const types = { deposit: '➕ Depozit', withdrawal: '➖ Yechish', win: '✅ Yutuq', loss: '❌ Yutqazish', promo: '🎁 Promo' };
+      el.innerHTML = r.d.map(t => `
+    <div class="txn-row">
+      <span class="txn-type">${types[t.type] || t.type}</span>
+      <span class="txn-am" style="color:${t.type === 'deposit' || t.type === 'win' || t.type === 'promo' ? 'var(--green)' : 'var(--red)'}">
+        ${t.type === 'withdrawal' || t.type === 'loss' ? '-' : '+'} ${Math.floor(t.amount).toLocaleString('ru')} UZS
+      </span>
+      <span class="txn-st st-${t.status}">${{ pending: '⏳', approved: '✅', rejected: '❌' }[t.status] || t.status}</span>
+    </div>`).join('');
+    }
+
+    // ============ UI HELPERS ============
+    function showWin(amount, multiplier) {
+      document.getElementById('win-am').textContent = '+' + Math.floor(amount).toLocaleString('ru') + ' UZS';
+      document.getElementById('win-mx').textContent = 'x' + multiplier.toFixed(2);
+      document.getElementById('win-ov').classList.add('show');
+      loadUser();
+    }
+    function closeWin() { document.getElementById('win-ov').classList.remove('show'); }
+
+    let _tt;
+    function toast(msg, type = '') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'toast show ' + type;
+      clearTimeout(_tt);
+      _tt = setTimeout(() => el.classList.remove('show'), 2800);
+    }
+  </script>
+</body>
+
+</html>
