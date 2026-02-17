@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: casino_db
+      POSTGRES_USER: casino_user
+      POSTGRES_PASSWORD: casino_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U casino_user -d casino_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://casino_user:casino_pass@db:5432/casino_db
+      SECRET_KEY: ${SECRET_KEY}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+
+  # Telegram Bot
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      API_URL: http://backend:8000/api
+      WEB_APP_URL: ${WEB_APP_URL}
+      ADMIN_IDS: ${ADMIN_IDS}
+    depends_on:
+      - backend
+    restart: always
+
+  # Nginx (serves frontend + proxy to backend)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./frontend:/usr/share/nginx/html/casino
+      - ./admin:/usr/share/nginx/html/admin
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./ssl:/etc/nginx/ssl  # SSL certificates
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data:

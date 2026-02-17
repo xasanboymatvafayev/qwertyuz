@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Casino Admin Panel</title>
+  <style>
+    :root {
+      --bg: #0f0f1a;
+      --bg2: #1a1a2e;
+      --card: #1e1e35;
+      --border: #2a2a45;
+      --accent: #f5a623;
+      --green: #00e676;
+      --red: #ff1744;
+      --blue: #448aff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 240px;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      padding: 20px 0;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+    }
+
+    .sidebar-logo {
+      padding: 0 20px 20px;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      color: #8888aa;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: #fff;
+      background: rgba(245, 166, 35, 0.1);
+      border-right: 3px solid var(--accent);
+    }
+
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      padding: 24px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .stat-card .num {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .stat-card .label {
+      color: #8888aa;
+      font-size: 13px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      color: #8888aa;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 14px;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-pending {
+      background: rgba(255, 166, 35, 0.15);
+      color: var(--accent);
+    }
+
+    .badge-approved {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--green);
+    }
+
+    .badge-rejected {
+      background: rgba(255, 23, 68, 0.15);
+      color: var(--red);
+    }
+
+    .badge-blocked {
+      background: rgba(255, 23, 68, 0.15);
+      color: var(--red);
+    }
+
+    .badge-active {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--green);
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.85;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-success {
+      background: var(--green);
+      color: #000;
+    }
+
+    .btn-danger {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      color: #8888aa;
+    }
+
+    .form-group input,
+    .form-group select {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--accent);
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      min-width: 400px;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .modal-close {
+      background: var(--bg2);
+      border: none;
+      color: #fff;
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 14px;
+      z-index: 999;
+      display: none;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    .toast.success {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .toast.error {
+      border-color: var(--red);
+      color: var(--red);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-logo">🎰 ADMIN</div>
+    <div class="nav-link active" onclick="showPage('dashboard')">📊 Dashboard</div>
+    <div class="nav-link" onclick="showPage('transactions')">💰 To'lovlar</div>
+    <div class="nav-link" onclick="showPage('users')">👥 Foydalanuvchilar</div>
+    <div class="nav-link" onclick="showPage('promo')">🎟 Promokodlar</div>
+    <div class="nav-link" onclick="showPage('channels')">📢 Kanallar</div>
+    <div class="nav-link" onclick="showPage('ads')">📣 Reklama</div>
+    <div style="margin-top:auto;padding:20px">
+      <div style="color:#8888aa;font-size:13px;margin-bottom:8px" id="admin-info">Yuklanmoqda...</div>
+      <div class="btn btn-danger btn-sm" onclick="logout()">Chiqish</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- LOGIN PAGE -->
+    <div id="login-page" style="display:flex;align-items:center;justify-content:center;min-height:80vh">
+      <div class="card" style="max-width:380px;width:100%">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="font-size:48px">🎰</div>
+          <div style="font-size:22px;font-weight:700;margin-top:8px">Admin Panel</div>
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label>Login</label>
+          <input type="text" id="admin-login" placeholder="admin login">
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label>Parol</label>
+          <input type="password" id="admin-password" placeholder="parol">
+        </div>
+        <button class="btn btn-primary" style="width:100%;padding:12px" onclick="adminLogin()">Kirish</button>
+        <div id="login-err" style="color:var(--red);font-size:13px;margin-top:8px;display:none">Noto'g'ri ma'lumotlar
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="page" id="dashboard">
+      <div class="page-title">📊 Dashboard</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="num" id="s-users" style="color:var(--blue)">-</div>
+          <div class="label">Jami foydalanuvchilar</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="s-balance" style="color:var(--accent)">-</div>
+          <div class="label">Jami balans (UZS)</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="s-profit" style="color:var(--green)">-</div>
+          <div class="label">Bugungi foyda</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="s-active" style="color:var(--green)">-</div>
+          <div class="label">Bugun aktiv</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="card">
+          <div class="card-title">🏆 Top yutuqchilar</div>
+          <div id="top-winners">Yuklanmoqda...</div>
+        </div>
+        <div class="card">
+          <div class="card-title">📉 Top yutqazganlar</div>
+          <div id="top-losers">Yuklanmoqda...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div class="page" id="transactions">
+      <div class="page-title">💰 To'lovlar</div>
+      <div class="card">
+        <div class="card-title">
+          ⏳ Kutayotgan so'rovlar
+          <button class="btn btn-primary btn-sm" onclick="loadPendingTxns()">Yangilash</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Foydalanuvchi</th>
+              <th>Tur</th>
+              <th>Summa</th>
+              <th>Vaqt</th>
+              <th>Amal</th>
+            </tr>
+          </thead>
+          <tbody id="pending-txns">
+            <tr>
+              <td colspan="6" style="text-align:center;color:#8888aa">Yuklanmoqda...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Barcha tranzaksiyalar</div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Foydalanuvchi</th>
+              <th>Tur</th>
+              <th>Summa</th>
+              <th>Holat</th>
+              <th>Vaqt</th>
+            </tr>
+          </thead>
+          <tbody id="all-txns"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="users">
+      <div class="page-title">👥 Foydalanuvchilar</div>
+      <div class="search-bar">
+        <input type="text" id="user-search" placeholder="Login yoki Telegram ID qidirish..." oninput="searchUsers()">
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Login</th>
+              <th>Telegram</th>
+              <th>Balans</th>
+              <th>Yutuq</th>
+              <th>Holat</th>
+              <th>Amal</th>
+            </tr>
+          </thead>
+          <tbody id="users-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PROMO -->
+    <div class="page" id="promo">
+      <div class="page-title">🎟 Promokodlar</div>
+      <div class="card">
+        <div class="card-title">Yangi promokod yaratish</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Kod</label>
+            <input type="text" id="promo-code" placeholder="BONUS50">
+          </div>
+          <div class="form-group">
+            <label>Tur</label>
+            <select id="promo-type">
+              <option value="percentage">Foiz (%)</option>
+              <option value="fixed">Belgilangan (UZS)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Qiymat</label>
+            <input type="number" id="promo-value" placeholder="50">
+          </div>
+          <div class="form-group">
+            <label>Max foydalanish (bo'sh = cheksiz)</label>
+            <input type="number" id="promo-maxuses" placeholder="">
+          </div>
+          <div class="form-group">
+            <label>Amal qilish (kun)</label>
+            <input type="number" id="promo-days" placeholder="30">
+          </div>
+          <div class="form-group">
+            <label>Minimal depozit (UZS)</label>
+            <input type="number" id="promo-mindep" placeholder="0">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+          <input type="checkbox" id="promo-sub">
+          <label style="cursor:pointer" for="promo-sub">Kanal obunasi talab qilinsin</label>
+        </div>
+        <button class="btn btn-primary" onclick="createPromo()">Yaratish</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Mavjud promokodlar <button class="btn btn-sm" onclick="loadPromos()"
+            style="background:var(--bg2)">Yangilash</button></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Kod</th>
+              <th>Tur</th>
+              <th>Qiymat</th>
+              <th>Foydalanish</th>
+              <th>Muddati</th>
+              <th>Holat</th>
+            </tr>
+          </thead>
+          <tbody id="promo-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CHANNELS -->
+    <div class="page" id="channels">
+      <div class="page-title">📢 Majburiy kanallar</div>
+      <div class="card">
+        <div class="card-title">Kanal qo'shish</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Kanal ID (@username yoki -100xxxx)</label>
+            <input type="text" id="ch-id" placeholder="@mychannel">
+          </div>
+          <div class="form-group">
+            <label>Kanal nomi</label>
+            <input type="text" id="ch-name" placeholder="Kanal nomi">
+          </div>
+          <div class="form-group">
+            <label>Kanal URL</label>
+            <input type="text" id="ch-url" placeholder="https://t.me/mychannel">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addChannel()">Qo'shish</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Aktiv kanallar</div>
+        <div id="channels-list">Yuklanmoqda...</div>
+      </div>
+    </div>
+
+    <!-- ADS -->
+    <div class="page" id="ads">
+      <div class="page-title">📣 Reklama</div>
+      <div class="card">
+        <div class="card-title">Yangi reklama yaratish</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tur</label>
+            <select id="ad-type">
+              <option value="banner">Banner</option>
+              <option value="popup">Popup</option>
+              <option value="bot_message">Bot xabari</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Sarlavha</label>
+            <input type="text" id="ad-title" placeholder="Sarlavha">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label>Matn</label>
+          <input type="text" id="ad-content" placeholder="Reklama matni">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Rasm URL (ixtiyoriy)</label>
+            <input type="text" id="ad-image" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Havola (ixtiyoriy)</label>
+            <input type="text" id="ad-link" placeholder="https://...">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="createAd()">Yaratish</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Reklamalar</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Tur</th>
+              <th>Sarlavha</th>
+              <th>Ko'rsatilgan</th>
+              <th>Holat</th>
+            </tr>
+          </thead>
+          <tbody id="ads-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER DETAIL MODAL -->
+  <div class="modal-overlay" id="user-modal">
+    <div class="modal">
+      <div class="modal-title">👤 Foydalanuvchi boshqaruvi <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div id="user-modal-content"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = 'https://your-api.com/api'; // Change this!
+    let adminToken = localStorage.getItem('admin_token');
+    let selectedUserId = null;
+
+    window.onload = function () {
+      if (adminToken) {
+        document.getElementById('login-page').style.display = 'none';
+        showPage('dashboard');
+        loadStats();
+        loadUsers();
+        loadPendingTxns();
+        loadPromos();
+        loadChannels();
+        loadAds();
+      }
+    };
+
+    async function api(method, path, data) {
+      const opts = { method, headers: { 'Content-Type': 'application/json' } };
+      if (adminToken) opts.headers['Authorization'] = `Bearer ${adminToken}`;
+      if (data) opts.body = JSON.stringify(data);
+      const resp = await fetch(API + path, opts);
+      const json = await resp.json();
+      return { data: json, ok: resp.ok };
+    }
+
+    async function adminLogin() {
+      const login = document.getElementById('admin-login').value;
+      const password = document.getElementById('admin-password').value;
+      const r = await api('POST', '/auth/login', { login, password });
+      if (r.ok && r.data.user?.is_admin) {
+        adminToken = r.data.access_token;
+        localStorage.setItem('admin_token', adminToken);
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('admin-info').textContent = '👑 ' + r.data.user.login;
+        showPage('dashboard');
+        loadStats(); loadUsers(); loadPendingTxns(); loadPromos(); loadChannels(); loadAds();
+      } else {
+        document.getElementById('login-err').style.display = 'block';
+      }
+    }
+
+    function logout() {
+      adminToken = null;
+      localStorage.removeItem('admin_token');
+      location.reload();
+    }
+
+    function showPage(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(page)?.classList.add('active');
+      document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+    }
+
+    async function loadStats() {
+      const r = await api('GET', '/admin/stats');
+      if (!r.ok) return;
+      const s = r.data;
+      document.getElementById('s-users').textContent = s.total_users?.toLocaleString();
+      document.getElementById('s-balance').textContent = s.total_balance?.toLocaleString('uz');
+      document.getElementById('s-profit').textContent = s.daily_profit?.toLocaleString('uz');
+      document.getElementById('s-active').textContent = s.active_users_today;
+
+      document.getElementById('top-winners').innerHTML = s.top_winners?.map(u =>
+        `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span>${u.login}</span><span style="color:var(--green)">${u.wins?.toLocaleString()} UZS</span>
+    </div>`
+      ).join('') || 'Ma\'lumot yo\'q';
+
+      document.getElementById('top-losers').innerHTML = s.top_losers?.map(u =>
+        `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span>${u.login}</span><span style="color:var(--red)">${u.losses?.toLocaleString()} UZS</span>
+    </div>`
+      ).join('') || 'Ma\'lumot yo\'q';
+    }
+
+    async function loadPendingTxns() {
+      const r = await api('GET', '/admin/transactions/pending');
+      if (!r.ok) return;
+      const tbody = document.getElementById('pending-txns');
+      if (!r.data.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#8888aa">Kutayotgan so\'rovlar yo\'q</td></tr>';
+        return;
+      }
+      tbody.innerHTML = r.data.map(t => `
+    <tr>
+      <td>#${t.id}</td>
+      <td><b>${t.user_login}</b><br><small style="color:#8888aa">${t.telegram_id}</small></td>
+      <td>${t.type === 'deposit' ? '➕ Depozit' : '➖ Yechish'}</td>
+      <td><b>${t.amount?.toLocaleString()} UZS</b></td>
+      <td style="color:#8888aa">${new Date(t.created_at).toLocaleString('uz')}</td>
+      <td>
+        <button class="btn btn-success btn-sm" onclick="approveTxn(${t.id})">✅</button>
+        <button class="btn btn-danger btn-sm" onclick="rejectTxn(${t.id})" style="margin-left:4px">❌</button>
+      </td>
+    </tr>`).join('');
+    }
+
+    async function approveTxn(id) {
+      const r = await api('POST', `/admin/transactions/${id}/approve`, {});
+      if (r.ok) { showToast('Tasdiqlandi!', 'success'); loadPendingTxns(); loadStats(); }
+      else showToast('Xato!', 'error');
+    }
+
+    async function rejectTxn(id) {
+      const r = await api('POST', `/admin/transactions/${id}/reject`, {});
+      if (r.ok) { showToast('Rad etildi', 'success'); loadPendingTxns(); }
+    }
+
+    async function loadUsers(search = '') {
+      const url = search ? `/admin/users?search=${encodeURIComponent(search)}` : '/admin/users';
+      const r = await api('GET', url);
+      if (!r.ok) return;
+
+      document.getElementById('users-table').innerHTML = r.data.map(u => `
+    <tr>
+      <td>${u.id}</td>
+      <td><b>${u.login}</b></td>
+      <td>${u.telegram_id}</td>
+      <td style="color:var(--accent)">${u.balance?.toLocaleString()}</td>
+      <td style="color:var(--green)">${u.total_wins?.toLocaleString()}</td>
+      <td><span class="badge badge-${u.status}">${u.status}</span></td>
+      <td><button class="btn btn-sm" onclick="openUserModal(${u.id}, '${u.login}', '${u.status}', ${u.balance})" style="background:var(--bg2)">Boshqarish</button></td>
+    </tr>`).join('');
+    }
+
+    function searchUsers() {
+      clearTimeout(window._searchTimeout);
+      window._searchTimeout = setTimeout(() => loadUsers(document.getElementById('user-search').value), 300);
+    }
+
+    function openUserModal(id, login, status, balance) {
+      selectedUserId = id;
+      document.getElementById('user-modal-content').innerHTML = `
+    <div style="margin-bottom:16px">
+      <b>Login:</b> ${login}<br>
+      <b>Balans:</b> ${balance?.toLocaleString()} UZS<br>
+      <b>Holat:</b> <span class="badge badge-${status}">${status}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <button class="btn btn-danger btn-sm" onclick="userAction('block')">🚫 Bloklash</button>
+      <button class="btn btn-success btn-sm" onclick="userAction('unblock')">✅ Blokdan chiqarish</button>
+      <button class="btn btn-sm" onclick="userAction('freeze')" style="background:var(--blue)">🧊 Balans muzlatish</button>
+      <button class="btn btn-sm" onclick="userAction('game-ban')" style="background:#ff6b35">⛔ O'yin taqiqlash</button>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Balans qo'shish/ayirish (UZS)</label>
+      <input type="number" id="add-balance-amount" placeholder="50000">
+    </div>
+    <button class="btn btn-primary" onclick="addUserBalance()">Balans o'zgartirish</button>`;
+      document.getElementById('user-modal').classList.add('show');
+    }
+
+    async function userAction(action) {
+      const r = await api('POST', `/admin/users/${action}`, { user_id: selectedUserId });
+      if (r.ok) { showToast('Bajarildi!', 'success'); loadUsers(); closeModal(); }
+      else showToast('Xato!', 'error');
+    }
+
+    async function addUserBalance() {
+      const amount = parseFloat(document.getElementById('add-balance-amount').value);
+      if (!amount) return;
+      const r = await api('POST', `/admin/users/add-balance?user_id=${selectedUserId}&amount=${amount}`, {});
+      if (r.ok) { showToast('Balans yangilandi!', 'success'); loadUsers(); closeModal(); }
+    }
+
+    function closeModal() { document.getElementById('user-modal').classList.remove('show'); }
+
+    async function createPromo() {
+      const data = {
+        code: document.getElementById('promo-code').value.trim(),
+        bonus_type: document.getElementById('promo-type').value,
+        bonus_value: parseFloat(document.getElementById('promo-value').value),
+        max_uses: parseInt(document.getElementById('promo-maxuses').value) || null,
+        expires_days: parseInt(document.getElementById('promo-days').value) || null,
+        min_deposit: parseFloat(document.getElementById('promo-mindep').value) || 0,
+        require_subscription: document.getElementById('promo-sub').checked
+      };
+      const r = await api('POST', '/admin/promo/create', data);
+      if (r.ok) { showToast('Promokod yaratildi: ' + r.data.code, 'success'); loadPromos(); }
+      else showToast(r.data.detail || 'Xato!', 'error');
+    }
+
+    async function loadPromos() {
+      const r = await api('GET', '/admin/promo/list');
+      if (!r.ok) return;
+      document.getElementById('promo-table').innerHTML = r.data.map(p => `
+    <tr>
+      <td><code>${p.code}</code></td>
+      <td>${p.bonus_type === 'percentage' ? p.bonus_value + '%' : p.bonus_value.toLocaleString() + ' UZS'}</td>
+      <td>${p.current_uses}/${p.max_uses || '∞'}</td>
+      <td>${p.expires_at ? new Date(p.expires_at).toLocaleDateString() : 'Cheksiz'}</td>
+      <td><span class="badge badge-${p.is_active ? 'active' : 'rejected'}">${p.is_active ? 'Aktiv' : 'Tugagan'}</span></td>
+    </tr>`).join('');
+    }
+
+    async function addChannel() {
+      const r = await api('POST', '/admin/channels/add', {
+        channel_id: document.getElementById('ch-id').value,
+        channel_name: document.getElementById('ch-name').value,
+        channel_url: document.getElementById('ch-url').value
+      });
+      if (r.ok) { showToast('Kanal qo\'shildi!', 'success'); loadChannels(); }
+      else showToast('Xato!', 'error');
+    }
+
+    async function loadChannels() {
+      const r = await api('GET', '/admin/channels');
+      if (!r.ok) return;
+      document.getElementById('channels-list').innerHTML = r.data.length
+        ? r.data.map(c => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)">
+        <div><b>${c.name}</b> <span style="color:#8888aa">${c.channel_id}</span></div>
+        <div>
+          <a href="${c.url}" target="_blank" style="color:var(--blue);text-decoration:none;margin-right:12px">Ochish</a>
+          <button class="btn btn-danger btn-sm" onclick="removeChannel(${c.id})">O'chirish</button>
+        </div>
+      </div>`).join('')
+        : '<div style="color:#8888aa">Kanallar yo\'q</div>';
+    }
+
+    async function removeChannel(id) {
+      const r = await api('DELETE', `/admin/channels/${id}`);
+      if (r.ok) { showToast('O\'chirildi', 'success'); loadChannels(); }
+    }
+
+    async function createAd() {
+      const r = await api('POST', '/admin/ads/create', {
+        type: document.getElementById('ad-type').value,
+        title: document.getElementById('ad-title').value,
+        content: document.getElementById('ad-content').value,
+        image_url: document.getElementById('ad-image').value || null,
+        link: document.getElementById('ad-link').value || null
+      });
+      if (r.ok) { showToast('Reklama yaratildi!', 'success'); loadAds(); }
+    }
+
+    async function loadAds() {
+      const r = await api('GET', '/admin/ads');
+      if (!r.ok) return;
+      document.getElementById('ads-table').innerHTML = r.data.map(a => `
+    <tr>
+      <td>${a.type}</td>
+      <td>${a.title}</td>
+      <td>${a.show_count}</td>
+      <td><span class="badge badge-${a.is_active ? 'active' : 'rejected'}">${a.is_active ? 'Aktiv' : 'Nofaol'}</span></td>
+    </tr>`).join('');
+    }
+
+    let toastT;
+    function showToast(msg, type = '') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'toast show ' + type;
+      clearTimeout(toastT);
+      toastT = setTimeout(() => el.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+
+</html>
